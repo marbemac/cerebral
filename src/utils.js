@@ -98,7 +98,8 @@ var utils = {
     }
   },
   hasLocalStorage: function() {
-    return typeof global.localStorage !== 'undefined';
+    // return typeof global.localStorage !== 'undefined';
+    return false
   },
   applyObjectDiff: function(targetObject, sourceObject) {
 
@@ -164,7 +165,7 @@ var utils = {
     }, initialObject);
   },
   getSignalPath: function(currentPath, stringPath) {
-    
+
     var path = stringPath.split('.');
     var key = path.pop();
 
@@ -173,7 +174,7 @@ var utils = {
       currentPath[nestedKey] = currentPath[nestedKey] || {};
       currentPath = currentPath[nestedKey];
     }
-    
+
     return {
       path: currentPath,
       key: key
