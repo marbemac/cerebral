@@ -11,96 +11,96 @@ var utils = require('./utils.js');
 
 var EventStore = function(state, cerebral) {
 
-  // We grab the signals stored in localStorage, if any
-  var signals = utils.hasLocalStorage() && localStorage.getItem('cerebral_signals') ?
-    JSON.parse(localStorage.getItem('cerebral_signals')) : [];
+  // // We grab the signals stored in localStorage, if any
+  // var signals = utils.hasLocalStorage() && localStorage.getItem('cerebral_signals') ?
+  //   JSON.parse(localStorage.getItem('cerebral_signals')) : [];
 
-  // The initial state is used to reset the cerebral
-  this.initialState = state;
+  // // The initial state is used to reset the cerebral
+  // this.initialState = state;
 
-  // Indicates if signals should be stored or replaced. Grabs from localStorage if available
-  this.willKeepState = (
-    process.env.NODE_ENV === 'production' ?
-    false :
-    utils.hasLocalStorage() && localStorage.getItem('cerebral_keepState') ?
-    JSON.parse(localStorage.getItem('cerebral_keepState')) : 
-    true
-  );
+  // // Indicates if signals should be stored or replaced. Grabs from localStorage if available
+  // this.willKeepState = (
+  //   process.env.NODE_ENV === 'production' ?
+  //   false :
+  //   utils.hasLocalStorage() && localStorage.getItem('cerebral_keepState') ?
+  //   JSON.parse(localStorage.getItem('cerebral_keepState')) :
+  //   true
+  // );
 
-  // Indicates if state should be stored into localStorage
-  this.willStoreState = (
-    process.env.NODE_ENV === 'production' ?
-    false :
-    utils.hasLocalStorage() && localStorage.getItem('cerebral_storeState') ?
-    JSON.parse(localStorage.getItem('cerebral_storeState')) : 
-    true
-  );
+  // // Indicates if state should be stored into localStorage
+  // this.willStoreState = (
+  //   process.env.NODE_ENV === 'production' ?
+  //   false :
+  //   utils.hasLocalStorage() && localStorage.getItem('cerebral_storeState') ?
+  //   JSON.parse(localStorage.getItem('cerebral_storeState')) :
+  //   true
+  // );
 
 
-  this.signals = signals;
-  this.asyncSignals = [];
+  // this.signals = signals;
+  // this.asyncSignals = [];
 
-  // Flag used to evaluate that new signals should be stored, as they will trigger when "travelling"
-  this.hasExecutingSignals = false;
+  // // Flag used to evaluate that new signals should be stored, as they will trigger when "travelling"
+  // this.hasExecutingSignals = false;
 
-  // Flag used by debugger to evaluate if travelling should be possible. Should not travel while executing
-  // signals
-  this.hasExecutingAsyncSignals = false;
+  // // Flag used by debugger to evaluate if travelling should be possible. Should not travel while executing
+  // // signals
+  // this.hasExecutingAsyncSignals = false;
 
-  // -1 means "no"
-  this.currentIndex = -1;
+  // // -1 means "no"
+  // this.currentIndex = -1;
 
-  // We keep a reference to the cerebral
-  this.cerebral = cerebral;
+  // // We keep a reference to the cerebral
+  // this.cerebral = cerebral;
 
-  // When travelling it should not trigger any events
-  // TODO: Might make more sense to put this on the cerebral
-  this.isSilent = false;
+  // // When travelling it should not trigger any events
+  // // TODO: Might make more sense to put this on the cerebral
+  // this.isSilent = false;
 
 };
 
 // Flips flag of storing signals or replacing them. Needs to trigger a special
 // event to notify Debugger about the change
 EventStore.prototype.toggleKeepState = function() {
-  this.willKeepState = !this.willKeepState;
-  this.cerebral.emit('eventStoreUpdate');
+  // this.willKeepState = !this.willKeepState;
+  // this.cerebral.emit('eventStoreUpdate');
 };
 
 // Flips flag of storing state into localStorage
 EventStore.prototype.toggleStoreState = function() {
-  this.willStoreState = !this.willStoreState;
-  this.cerebral.emit('eventStoreUpdate');
+  // this.willStoreState = !this.willStoreState;
+  // this.cerebral.emit('eventStoreUpdate');
 };
 
 EventStore.prototype.addAsyncSignal = function(signal) {
 
-  // If it is an ending async signal, remove it from the list by comparing
-  // the start time. TODO: Should also check name of signal?
-  if (signal.end) {
+  // // If it is an ending async signal, remove it from the list by comparing
+  // // the start time. TODO: Should also check name of signal?
+  // if (signal.end) {
 
-    var startSignal = this.asyncSignals.filter(function(existingSignal) {
-      return existingSignal.start === existingSignal.start;
-    }).pop();
-    this.asyncSignals.splice(this.asyncSignals.indexOf(startSignal), 1);
+  //   var startSignal = this.asyncSignals.filter(function(existingSignal) {
+  //     return existingSignal.start === existingSignal.start;
+  //   }).pop();
+  //   this.asyncSignals.splice(this.asyncSignals.indexOf(startSignal), 1);
 
-    // Or add it to the list
-  } else {
+  //   // Or add it to the list
+  // } else {
 
-    this.asyncSignals.push(signal);
+  //   this.asyncSignals.push(signal);
 
-    // If it is the first signal we should flip flag and notify with an event
-    if (this.asyncSignals.length === 1) {
-      this.hasExecutingAsyncSignals = true;
-      this.cerebral.emit('eventStoreUpdate');
-    }
+  //   // If it is the first signal we should flip flag and notify with an event
+  //   if (this.asyncSignals.length === 1) {
+  //     this.hasExecutingAsyncSignals = true;
+  //     this.cerebral.emit('eventStoreUpdate');
+  //   }
 
-  }
+  // }
 
-  // When no more signals flip flag and notify with event
-  if (!this.asyncSignals.length) {
-    this.hasExecutingAsyncSignals = false;
-    this.cerebral.emit('eventStoreUpdate');
-  }
+  // // When no more signals flip flag and notify with event
+  // if (!this.asyncSignals.length) {
+  //   this.hasExecutingAsyncSignals = false;
+  //   this.cerebral.emit('eventStoreUpdate');
+  // }
 
 };
 
@@ -108,138 +108,138 @@ EventStore.prototype.addAsyncSignal = function(signal) {
 EventStore.prototype.addSignal = function(signal) {
 
   // When executing signals in EventStore, do not add them again
-  if (this.hasExecutingSignals) {
-    return;
-  }
+  // if (this.hasExecutingSignals) {
+  //   return;
+  // }
 
-  // If we are not keeping the state around reset the signals to just
-  // keep the latest one
-  if (!this.willKeepState) {
-    this.signals = [];
-    this.currentIndex = 0;
-  }
+  // // If we are not keeping the state around reset the signals to just
+  // // keep the latest one
+  // if (!this.willKeepState) {
+  //   this.signals = [];
+  //   this.currentIndex = 0;
+  // }
 
-  // If we have travelled back and start adding new signals the signals not triggered should
-  // be removed. This effectively "changes history"
-  if (this.currentIndex < this.signals.length) {
-    this.signals.splice(this.currentIndex, this.signals.length - this.currentIndex);
-  }
+  // // If we have travelled back and start adding new signals the signals not triggered should
+  // // be removed. This effectively "changes history"
+  // if (this.currentIndex < this.signals.length) {
+  //   this.signals.splice(this.currentIndex, this.signals.length - this.currentIndex);
+  // }
 
-  signal.index = this.signals.length;
-  // Add signal and set the current signal to be the recently added signal
-  this.signals.push(signal);
+  // signal.index = this.signals.length;
+  // // Add signal and set the current signal to be the recently added signal
+  // this.signals.push(signal);
 
 };
 
 // Adds an action to the signal, unless travelling
 EventStore.prototype.addAction = function(action) {
-  if (this.hasExecutingSignals) {
-    return;
-  }
-  this.signals[action.signalIndex].actions.push(action);
+  // if (this.hasExecutingSignals) {
+  //   return;
+  // }
+  // this.signals[action.signalIndex].actions.push(action);
 };
 
 // Adds a mutation to an action inside a signal, unless travelling
 EventStore.prototype.addMutation = function(mutation) {
-  if (this.hasExecutingSignals) {
-    return;
-  }
-  var signal = this.signals[mutation.signalIndex];
-  signal.actions[signal.actions.length - 1].mutations.push(mutation);
+  // if (this.hasExecutingSignals) {
+  //   return;
+  // }
+  // var signal = this.signals[mutation.signalIndex];
+  // signal.actions[signal.actions.length - 1].mutations.push(mutation);
 };
 
 // TODO: What names to use, remember or just signals?
 // This is used when loading up the app and producing the last known state
 EventStore.prototype.rememberNow = function(state) {
 
-  if (!this.signals.length) {
-    return;
-  }
+  // if (!this.signals.length) {
+  //   return;
+  // }
 
-  // Silently travels (does not trigger events) before the
-  // app is loaded
-  this.isSilent = true;
+  // // Silently travels (does not trigger events) before the
+  // // app is loaded
+  // this.isSilent = true;
 
-  this.travel(this.signals.length - 1, state);
-  this.isSilent = false;
+  // this.travel(this.signals.length - 1, state);
+  // this.isSilent = false;
 };
 
 // Will reset the EventStore and cerebral completely
 // TODO: Should be in the cerebral really? Mostly cerebral related code here
 EventStore.prototype.reset = function(state) {
-  if (!this.hasExecutingAsyncSignals) {
+  // if (!this.hasExecutingAsyncSignals) {
 
-    this.signals = [];
+  //   this.signals = [];
 
-    // Remove all mapUpdate listeners as map functions will be added again
-    this.cerebral.removeAllListeners('mapUpdate');
+  //   // Remove all mapUpdate listeners as map functions will be added again
+  //   this.cerebral.removeAllListeners('mapUpdate');
 
-    this.cerebral.wash(this.initialState);
+  //   this.cerebral.wash(this.initialState);
 
-    this.currentIndex = -1;
+  //   this.currentIndex = -1;
 
-    // Update app with new data
-    this.cerebral.emit('update');
+  //   // Update app with new data
+  //   this.cerebral.emit('update');
 
-  }
+  // }
 };
 
 EventStore.prototype.travel = function(index, helpers) {
 
   var cerebral = this.cerebral;
 
-  // Flag that we are travelling.
-  // TODO: Should it be named remember instead?
-  // TODO: Is not hasExecutingSignals and isRemembering the same?
-  // TODO: Remove mapUpdate here too? Maybe have some resetToInitialState method?
-  this.hasExecutingSignals = true;
-  cerebral.isRemembering = true;
-  cerebral.removeAllListeners('mapUpdate');
+  // // Flag that we are travelling.
+  // // TODO: Should it be named remember instead?
+  // // TODO: Is not hasExecutingSignals and isRemembering the same?
+  // // TODO: Remove mapUpdate here too? Maybe have some resetToInitialState method?
+  // this.hasExecutingSignals = true;
+  // cerebral.isRemembering = true;
+  // cerebral.removeAllListeners('mapUpdate');
 
-  // TODO: This should also be part of general reset?
-  Object.keys(this.initialState).forEach(function(key) {
-    helpers.currentState = helpers.currentState.set(key, this.initialState[key]);
-  }, this);
+  // // TODO: This should also be part of general reset?
+  // Object.keys(this.initialState).forEach(function(key) {
+  //   helpers.currentState = helpers.currentState.set(key, this.initialState[key]);
+  // }, this);
 
-  // If going back to initial state, just return and update
-  if (index === -1) {
+  // // If going back to initial state, just return and update
+  // if (index === -1) {
 
-    this.currentIndex = index;
-    this.hasExecutingSignals = false;
-    cerebral.isRemembering = false;
-    cerebral.emit('update');
-    return cerebral;
+  //   this.currentIndex = index;
+  //   this.hasExecutingSignals = false;
+  //   cerebral.isRemembering = false;
+  //   cerebral.emit('update');
+  //   return cerebral;
 
-  } else {
+  // } else {
 
-    // Start from beginning
-    this.currentIndex = -1;
+  //   // Start from beginning
+  //   this.currentIndex = -1;
 
-    // Go through signals
-    for (var x = 0; x <= index; x++) {
+  //   // Go through signals
+  //   for (var x = 0; x <= index; x++) {
 
-      var signal = this.signals[x];
-      if (!signal) {
-        break;
-      }
+  //     var signal = this.signals[x];
+  //     if (!signal) {
+  //       break;
+  //     }
 
-      // Trigger signal and then set what has become the current signal
-      var signalName = signal.name.split('.');
-      var signalPath = cerebral.signals;
-      while (signalName.length) {
-        signalPath = signalPath[signalName.shift()];
-      }
-      signalPath.apply(cerebral, signal.args);
-      this.currentIndex = x;
+  //     // Trigger signal and then set what has become the current signal
+  //     var signalName = signal.name.split('.');
+  //     var signalPath = cerebral.signals;
+  //     while (signalName.length) {
+  //       signalPath = signalPath[signalName.shift()];
+  //     }
+  //     signalPath.apply(cerebral, signal.args);
+  //     this.currentIndex = x;
 
-    }
+  //   }
 
-  }
+  // }
 
-  // Reset flags and emit event to set application in correct state
-  this.hasExecutingSignals = false;
-  cerebral.emit('update');
-  cerebral.isRemembering = false;
+  // // Reset flags and emit event to set application in correct state
+  // this.hasExecutingSignals = false;
+  // cerebral.emit('update');
+  // cerebral.isRemembering = false;
 
   return cerebral;
 };
